@@ -1,0 +1,98 @@
+### Requisições de exemplo (extensão "REST Client" do VS Code, ou copie para Postman/Insomnia/Thunder Client)
+@base = http://localhost:3000
+
+### Saúde / conexão com o banco
+GET {{base}}/saude
+
+### ---------------- VENDEDORES ----------------
+
+### Cadastrar vendedor (201)
+POST {{base}}/vendedores
+Content-Type: application/json
+
+{ "nome": "Fernanda Costa", "meta_mensal": 18000, "percentual_base": 5 }
+
+### Cadastro inválido (400)
+POST {{base}}/vendedores
+Content-Type: application/json
+
+{ "nome": "", "meta_mensal": -10, "percentual_base": 5 }
+
+### Listar todos
+GET {{base}}/vendedores
+
+### Listar apenas ativos
+GET {{base}}/vendedores?ativo=1
+
+### Consultar por código
+GET {{base}}/vendedores/1
+
+### Vendedor inexistente (404)
+GET {{base}}/vendedores/999
+
+### Atualizar meta mensal e percentual base
+PUT {{base}}/vendedores/1
+Content-Type: application/json
+
+{ "meta_mensal": 22000, "percentual_base": 5.5 }
+
+### Desativar vendedor (preserva histórico)
+PATCH {{base}}/vendedores/5/desativar
+
+### ---------------- VENDAS ----------------
+
+### Registrar venda — exemplo do enunciado: R$ 2.000, PJ, Norte, base 5% => R$ 180,00
+POST {{base}}/vendas
+Content-Type: application/json
+
+{ "id_venda": 2001, "id_vendedor": 1, "id_regiao": 1, "data_venda": "2026-10-23 10:00:00", "valor_venda": 2000, "tipo_cliente": "PJ" }
+
+### Código de venda duplicado (409)
+POST {{base}}/vendas
+Content-Type: application/json
+
+{ "id_venda": 1001, "id_vendedor": 1, "id_regiao": 1, "valor_venda": 500, "tipo_cliente": "PF" }
+
+### Vendedor inexistente (404)
+POST {{base}}/vendas
+Content-Type: application/json
+
+{ "id_vendedor": 999, "id_regiao": 1, "valor_venda": 500, "tipo_cliente": "PF" }
+
+### Vendedor inativo (422) — desative o vendedor 5 antes
+POST {{base}}/vendas
+Content-Type: application/json
+
+{ "id_vendedor": 5, "id_regiao": 1, "valor_venda": 500, "tipo_cliente": "PF" }
+
+### Valor negativo (400)
+POST {{base}}/vendas
+Content-Type: application/json
+
+{ "id_vendedor": 1, "id_regiao": 1, "valor_venda": -100, "tipo_cliente": "PF" }
+
+### Listar vendas
+GET {{base}}/vendas
+
+### Vendas por vendedor
+GET {{base}}/vendas/vendedor/3
+
+### Vendas por região (1=Norte, 2=Nordeste, 3=Sudeste, 4=Sul)
+GET {{base}}/vendas/regiao/4
+
+### Excluir venda
+DELETE {{base}}/vendas/2001
+
+### Excluir venda inexistente (404)
+DELETE {{base}}/vendas/999999
+
+### ---------------- RELATÓRIOS ----------------
+
+### Relatório mensal (metas avaliadas em out/2026)
+GET {{base}}/relatorios/performance?inicio=2026-10-01&fim=2026-10-31
+
+### Período que cruza meses, meta avaliada em setembro
+GET {{base}}/relatorios/performance?inicio=2026-09-01&fim=2026-10-31&mes=2026-09
+
+### Datas inválidas (400)
+GET {{base}}/relatorios/performance?inicio=2026-10-31&fim=2026-10-01
